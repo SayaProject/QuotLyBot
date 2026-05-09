@@ -62,7 +62,7 @@ A Telegram bot that creates beautiful quote stickers from chat messages.
 This repository includes `railway.json`, `.env.example`, and a single-container starter for Railway.
 
 1. Create or connect this GitHub repository in Railway.
-2. Add Redis and MongoDB services, or provide external `REDIS_URL` and `MONGODB_URI` values.
+2. Add MongoDB, then add the Redis variables from `.env.example`.
 3. Add all required variables from `.env.example` in the Railway service variables tab.
 4. Deploy the [quote-api](https://github.com/LyoSU/quote-api) service separately and set `QUOTE_API_URI` to that service URL.
 5. Deploy. Railway will build with the Dockerfile, run `npm start`, and check `/health`.
@@ -109,15 +109,13 @@ This repository includes `railway.json`, `.env.example`, and a single-container 
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `BOT_TOKEN` | Telegram bot token from @BotFather | Yes |
-| `MONGODB_URI` | MongoDB connection string. `MONGO_URL`, `MONGO_PRIVATE_URL`, or `MONGO_PUBLIC_URL` are also accepted as Railway aliases. | Yes |
+| `MONGODB_URI` | MongoDB connection string | Yes |
 | `QUOTE_API_URI` | Quote generation API endpoint | Yes |
-| `REDIS_URL` | Redis connection string. `REDIS_HOST`/`REDIS_PORT` can be used instead. | Yes |
+| `QUOTE_API_URI_HTML` | Optional HTML quote generation API endpoint | No |
+| `REDIS_HOST` | Redis host, for example `redis-10702.c261.us-east-1-4.ec2.cloud.redislabs.com` | Yes |
+| `REDIS_PORT` | Redis port, for example `10702` | Yes |
 | `TELEGRAM_API_ID` | Telegram API ID for TDLib | Yes |
 | `TELEGRAM_API_HASH` | Telegram API hash for TDLib | Yes |
-| `MAX_WORKERS` | Number of worker processes | No |
-| `WORKER_HANDLER_TIMEOUT` | Worker timeout in milliseconds | No |
-| `WORKER_CONCURRENT_LIMIT` | Max concurrent updates per worker | No |
-| `PORT` | HTTP port for Railway health checks | No |
 
 ### Database Setup
 - MongoDB is required for storing user data, quotes, and statistics
