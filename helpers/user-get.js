@@ -6,26 +6,49 @@
 // concurrent updates from other workers handling parallel updates from
 // the same user (VersionError).
 
-module.exports = async ctx => {
-  let user
+function getTelegramId (ctx) {
+  const telegramId = ctx?.from?.id
+  return typeof telegramId === 'number' && Number.isFinite(telegramId)
+    ? telegramId
+    : null
+}
 
-  if (!ctx.session.userInfo) {
-    user = await ctx.db.User.findOne({ telegram_id: ctx.from.id })
-  } else {
-    user = ctx.session.userInfo
+function buildUserInsert (ctx, telegramId) {
+  const fullName = `${ctx.from.first_name}${ctx.from.last_name ? ` ${ctx.from.last_name}` : ''}`
+  const user = {
+    telegram_id: telegramId,
+    first_name: ctx.from.first_name,
+    last_name: ctx.from.last_name,
+    full_name: fullName,
+    username: ctx.from.username
   }
 
-  if (!user) {
-    const now = Math.floor(new Date().getTime() / 1000)
-    user = new ctx.db.User()
-    user.telegram_id = ctx.from.id
-    user.first_act = now
-    user.first_name = ctx.from.first_name
-    user.last_name = ctx.from.last_name
-    user.full_name = `${ctx.from.first_name}${ctx.from.last_name ? ` ${ctx.from.last_name}` : ''}`
-    user.username = ctx.from.username
-    if (ctx.chat && ctx.chat.type === 'private') user.status = 'member'
-    await user.save()
+  if (ctx.chat && ctx.chat.type === 'private') user.status = 'member'
+  return user
+}
+
+async function findOrCreateUser (ctx, telegramId) {
+  try {
+    return await ctx.db.User.findOneAndUpdate(
+      { telegram_id: telegramId },
+      { $setOnInsert: buildUserInsert(ctx, telegramId) },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+  } catch (error) {
+    if (error?.code !== 11000) throw error
+
+    return ctx.db.User.findOne({ telegram_id: telegramId })
+  }
+}
+
+async function getUser (ctx) {
+  const telegramId = getTelegramId(ctx)
+  if (telegramId === null) return false
+
+  let user = ctx.session.userInfo
+
+  if (!ctx.session.userInfo) {
+    user = await findOrCreateUser(ctx, telegramId)
   }
 
   ctx.session.userInfo = user
@@ -36,3 +59,8 @@ module.exports = async ctx => {
 
   return true
 }
+
+module.exports = getUser
+module.exports.buildUserInsert = buildUserInsert
+module.exports.findOrCreateUser = findOrCreateUser
+module.exports.getTelegramId = getTelegramId
