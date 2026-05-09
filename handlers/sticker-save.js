@@ -24,7 +24,6 @@ module.exports = async ctx => {
         stickerFile = replyMessage.document
       }
     } else if (replyMessage.photo) {
-      // eslint-disable-next-line prefer-destructuring
       stickerFile = replyMessage.photo.slice(-1)[0]
       if (replyMessage.caption) stickerFile.emoji = replyMessage.caption
     }

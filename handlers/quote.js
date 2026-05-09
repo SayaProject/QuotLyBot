@@ -1,7 +1,6 @@
 const Telegram = require('telegraf/telegram')
 const fs = require('fs')
 const path = require('path')
-const slug = require('limax')
 const EmojiDbLib = require('emoji-db')
 
 const emojiDb = new EmojiDbLib({ useDefaultDb: true })
@@ -343,7 +342,7 @@ const handleQuoteError = async (ctx, error) => {
   return ctx.replyWithHTML(ctx.i18n.t('quote.errors.api_down'))
 }
 
-module.exports = async (ctx, next) => {
+async function handleQuote (ctx, next) {
   const t0 = Date.now()
   // Use config from context if available, fallback to local config
   const currentConfig = normalizeQuoteConfig(ctx.config || config)
@@ -1328,6 +1327,8 @@ module.exports = async (ctx, next) => {
     }
   }
 }
+
+module.exports = handleQuote
 
 // Initialize sticker pack cleaning with delay to allow config loading
 configReady.then(() => {

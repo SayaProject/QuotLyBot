@@ -46,10 +46,9 @@ class TelegramCollector {
 
   setupBot() {
     // Simple middleware to collect all updates
-    this.bot.use(async (ctx, next) => {
+    this.bot.use(async (ctx) => {
       try {
         const update = ctx.update
-        const updateId = update.update_id
 
         // Add timestamp and priority
         const enrichedUpdate = {
@@ -80,7 +79,7 @@ class TelegramCollector {
     })
 
     // Error handling
-    this.bot.catch((err, ctx) => {
+    this.bot.catch((err) => {
       errorWithTimestamp('Bot error:', err.message)
     })
   }

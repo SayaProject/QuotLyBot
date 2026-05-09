@@ -85,7 +85,7 @@ class TelegramProcessor {
               pending.resolve(response.result)
             }
           }
-        } catch (error) {
+        } catch (_error) {
           // Ignore parse errors
         }
       }
@@ -158,7 +158,7 @@ class TelegramProcessor {
     this.bot.use(handler)
 
     // Error handling
-    this.bot.catch((err, ctx) => {
+    this.bot.catch((err) => {
       this.errorCount++
       errorWithTimestamp('Bot error:', err.message)
     })

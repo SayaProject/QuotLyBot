@@ -43,7 +43,6 @@ async function main() {
   let totalOps = 0
   const started = Date.now()
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const filter = lastId ? { _id: { $gt: lastId } } : {}
     const batch = await Quote.find(filter)

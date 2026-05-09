@@ -61,7 +61,7 @@ const connectClient = async () => {
     if (client) {
       try {
         await client.close()
-      } catch (e) {
+      } catch (_error) {
         // Ignore close errors
       }
     }
@@ -273,7 +273,7 @@ function getMessages (chatID, messageIds) {
 
       const messages = response.messages.map((messageInfo) => {
         if (!messageInfo) return {}
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           const message = {
             message_id: messageInfo.id / Math.pow(2, 20),
             date: messageInfo.date

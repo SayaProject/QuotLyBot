@@ -60,7 +60,7 @@ class HighLoadStats {
       }
 
       await pipeline.exec()
-    } catch (error) {
+    } catch (_error) {
       // Silent fail - stats are not critical
     }
   }
@@ -168,7 +168,7 @@ class HighLoadStats {
     }
   }
 
-  async getStatsForPeriod (startTime, endTime) {
+  async getStatsForPeriod (_startTime, _endTime) {
     throw new Error('Not implemented')
   }
 }
