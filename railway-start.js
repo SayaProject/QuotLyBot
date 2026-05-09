@@ -44,6 +44,10 @@ function validateEnv () {
     missing.push('REDIS_URL or REDIS_HOST')
   }
 
+  if (!process.env.REDIS_URL && process.env.REDIS_HOST?.includes('redislabs.com') && !process.env.REDIS_PASSWORD) {
+    missing.push('REDIS_PASSWORD')
+  }
+
   if (missing.length > 0) {
     console.error(`[railway] Missing required environment variables: ${missing.join(', ')}`)
     process.exit(1)

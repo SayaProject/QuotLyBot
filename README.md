@@ -113,6 +113,8 @@ This repository includes `railway.json`, `.env.example`, and a single-container 
 | `QUOTE_API_URI` | Quote generation API endpoint | Yes |
 | `REDIS_HOST` | Redis host, for example `redis-10702.c261.us-east-1-4.ec2.cloud.redislabs.com` | Yes |
 | `REDIS_PORT` | Redis port, for example `10702` | Yes |
+| `REDIS_USERNAME` | Redis username, usually `default` for Redis Cloud | Yes |
+| `REDIS_PASSWORD` | Redis password from Redis Cloud | Yes |
 | `TELEGRAM_API_ID` | Telegram API ID for TDLib | Yes |
 | `TELEGRAM_API_HASH` | Telegram API hash for TDLib | Yes |
 
