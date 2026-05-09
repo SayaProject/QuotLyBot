@@ -945,7 +945,7 @@ module.exports = async (ctx, next) => {
   let format
   if (type === 'quote') format = 'webp'
 
-  const quoteApiUri = flag.html ? process.env.QUOTE_API_URI_HTML : process.env.QUOTE_API_URI
+  const quoteApiUri = process.env.QUOTE_API_URI
 
   // Allocate local_id (per-group quote counter) in parallel with the slow
   // webp generation. Needed pre-send so the "Open in app" button has a URL.

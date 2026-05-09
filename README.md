@@ -111,7 +111,6 @@ This repository includes `railway.json`, `.env.example`, and a single-container 
 | `BOT_TOKEN` | Telegram bot token from @BotFather | Yes |
 | `MONGODB_URI` | MongoDB connection string | Yes |
 | `QUOTE_API_URI` | Quote generation API endpoint | Yes |
-| `QUOTE_API_URI_HTML` | Optional HTML quote generation API endpoint | No |
 | `REDIS_HOST` | Redis host, for example `redis-10702.c261.us-east-1-4.ec2.cloud.redislabs.com` | Yes |
 | `REDIS_PORT` | Redis port, for example `10702` | Yes |
 | `TELEGRAM_API_ID` | Telegram API ID for TDLib | Yes |
