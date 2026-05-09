@@ -1,5 +1,4 @@
 const Markup = require('telegraf/markup')
-const { randomInt } = require('crypto')
 const deepLink = require('../helpers/deep-link')
 
 module.exports = async (ctx, next) => {
@@ -22,22 +21,6 @@ module.exports = async (ctx, next) => {
     return
   }
 
-  let adv, advKeyboard
-
-  if (randomInt(0, 30) === 0) {
-    adv = (await ctx.db.Adv.aggregate([
-      {
-        $match: {
-          status: 2,
-          locale: ctx.i18n.locale() || 'en'
-        }
-      },
-      { $sample: { size: 1 } }
-    ]))[0]
-  }
-
-  if (adv) advKeyboard = Markup.urlButton(adv.text, adv.link)
-
   // Link straight to the picked quote when we have both local_id and the
   // bot username (populated by telegraf after launch).
   const appButton = (quote.local_id != null && ctx.botInfo && ctx.botInfo.username)
@@ -54,15 +37,10 @@ module.exports = async (ctx, next) => {
     ]
   ]
   if (appButton) rows.push([appButton])
-  if (advKeyboard) rows.push([advKeyboard])
 
   await ctx.replyWithDocument(quote.file_id, {
     reply_markup: Markup.inlineKeyboard(rows),
     reply_to_message_id: ctx.message.message_id,
     allow_sending_without_reply: true
   })
-
-  if (adv) {
-    await ctx.db.Adv.updateOne({ _id: adv._id }, { $inc: { 'stats.impressions': 1 } })
-  }
 }

@@ -352,7 +352,6 @@ Add a temporary `[quote:timing]` log to verify the latency win after deploy. Str
 
 Locate the existing requires (around lines 26-28):
 ```js
-const { sendGramadsAd } = require('../helpers/gramads')
 const deepLink = require('../helpers/deep-link')
 const denormalizeQuote = require('../utils/denormalize-quote')
 ```

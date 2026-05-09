@@ -8,8 +8,6 @@ const { onlyGroup, onlyAdmin } = require('./middlewares')
 const {
   handleStart,
   handleHelp,
-  handleAdv,
-  handleModerateAdv,
   handleQuote,
   handleGetQuote,
   handleTopQuote,
@@ -25,10 +23,6 @@ const {
   handleSettingsRate,
   handlePrivacy,
   handleLanguage,
-  handleAiMode,
-  handleFstik,
-  handleSticker,
-  handleDonate,
   handlePing,
   handleChatMember,
   handleInlineQuery,
@@ -209,49 +203,7 @@ bot.start(async (ctx, next) => {
   return next()
 })
 
-bot.hears(/\/q(.*)\*(.*)/, rateLimit({
-  window: 1000 * 25,
-  limit: 1,
-  keyGenerator: (ctx) => ctx.from.id,
-  onLimitExceeded: (ctx) => {
-    return ctx.replyWithHTML(ctx.i18n.t('rate_limit', {
-      seconds: 25
-    }), {
-      reply_to_message_id: ctx.message.message_id
-    }).then((msg) => {
-      setTimeout(() => {
-        ctx.deleteMessage().catch(() => {})
-        ctx.deleteMessage(msg.message_id).catch(() => {})
-      }, 5000)
-    })
-  }
-}))
-
-bot.command('donate', handleDonate)
 bot.command('ping', handlePing)
-bot.action(/(donate):(.*)/, handleDonate)
-bot.on('pre_checkout_query', ({ answerPreCheckoutQuery }) =>
-  answerPreCheckoutQuery(true)
-)
-bot.on('successful_payment', handleDonate)
-bot.hears(/\/refund (.*)/, async (ctx) => {
-  if (ctx.config.adminId !== ctx.from.id) return
-
-  const [_, paymentId] = ctx.match
-
-  const userId = paymentId.match(/U(\d+)/)[1]
-
-  try {
-    await ctx.telegram.callApi('refundStarPayment', {
-      user_id: userId,
-      telegram_payment_charge_id: paymentId
-    })
-
-    await ctx.replyWithHTML(`Refund success: ${userId} ${paymentId}`)
-  } catch (error) {
-    await ctx.replyWithHTML(`Refund error: ${error.description}`)
-  }
-})
 
 bot.command('qtop', onlyGroup, handleTopQuote)
 bot.command(
@@ -288,7 +240,6 @@ bot.use((ctx, next) => {
 
 bot.command('q', handleQuote)
 bot.hears(/\/q_(.*)/, handleGetQuote)
-bot.hears(/^\/qs(?:\s([^\s]+)|)/, handleFstik)
 bot.hears(/^\/qs(?:\s([^\s]+)|)/, onlyGroup, onlyAdmin, handleSave)
 bot.command('qd', onlyGroup, onlyAdmin, handleDelete)
 bot.command('qdrand', onlyGroup, onlyAdmin, handleDeleteRandom)
@@ -315,9 +266,6 @@ bot.action(/^menu:(.*)/, handleMenuCallback)
 
 bot.start(handleStart)
 bot.command('help', handleHelp)
-bot.use(handleAdv)
-
-bot.use(handleModerateAdv)
 
 bot.use(handleInlineQuery)
 
@@ -325,12 +273,6 @@ bot.command('privacy', onlyAdmin, handlePrivacy)
 
 bot.command('lang', handleLanguage)
 bot.action(/set_language:(.*)/, handleLanguage)
-
-bot.use(handleAiMode)
-
-// Sticker stats collection middleware (runs on all messages)
-// Tracks sticker usage and custom emoji for fstikbot catalog
-bot.use(handleSticker)
 
 bot.on('message', Composer.privateChat(handleQuote))
 

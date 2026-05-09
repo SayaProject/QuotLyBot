@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Zaman Aşımı Hatası</b>
       İstek çok uzun sürdü. Lütfen daha basit bir alıntıyla tekrar deneyin.
-  image_to_quote:
-    processing: |
-      🔍 Görüntü analiz ediliyor ve metin çıkarılıyor...
-    success: |
-      ✅ ${count} mesajdan alıntı oluşturuldu!
-
-      💡 <b>İpucu:</b> Alıntı oluşturmak için <code>/qi</code> veya <code>/quote_image</code> başlığı ile ekran görüntüsü gönderin
-    errors:
-      no_image: |
-        ❌ Lütfen bir resim dosyası gönderin (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ Resim çok büyük. Maksimum boyut: 20MB
-      unsupported_format: |
-        ❌ Desteklenmeyen resim formatı. Desteklenenler: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Resimde okunabilir sohbet mesajı bulunamadı. Bunun net bir sohbet ekran görüntüsü olduğundan emin olun.
-      parse_error: |
-        ❌ Tanıma hatası. Resim net bir sohbet metni içermiyor olabilir.
-      api_error: |
-        ❌ Metin tanıma hatası. Lütfen tekrar deneyin.
-      rate_limit: |
-        ⏳ Çok fazla istek var! Lütfen ${seconds} saniye bekleyin ve tekrar deneyin.
 sticker:
   save:
     suc: Başarıyla <a href="${link}">grup çıkartma paketinize</a> eklendi ✨
@@ -225,8 +203,6 @@ sticker:
     not_found: Bu alıntı veritabanında değil 🤔
   empty_forward: |
     Lütfen kaydetmek istediğiniz çıkartma, fotoğraf veya görüntüye yanıt verin ✨
-  fstik: |
-    Bunu kişisel çıkartma paketinize kaydetmek için @fStikBot'a iletin 🎨
 rate:
   vote:
     rated: |

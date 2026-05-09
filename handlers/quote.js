@@ -10,9 +10,7 @@ const emojiArray = Object.values(emojiDb.dbData).filter(data => {
 
 const telegram = new Telegram(process.env.BOT_TOKEN)
 
-const { sendGramadsAd } = require('../helpers/gramads')
 const deepLink = require('../helpers/deep-link')
-const { getOpenRouterClient } = require('../utils/openrouter-client')
 const denormalizeQuote = require('../utils/denormalize-quote')
 const buildQuoteReplyMarkup = require('../utils/build-quote-reply-markup')
 const persistQuoteArtifacts = require('../utils/persist-quote-artifacts')
@@ -337,16 +335,14 @@ module.exports = async (ctx, next) => {
     scale: false,
     crop: false,
     privacy: false,
-    ai: false,
     html: false,
-    aiQuery: false,
+    legacyStar: false,
   }
 
   const isCommand = ctx.message.text ? ctx.message.text.match(/\/q/) : false
 
   if (ctx.message && ctx.message.text && isCommand) {
     const args = ctx.message.text.split(' ')
-    const fullQuery = args.slice(1).join(' ') // Get everything after /q
     args.splice(0, 1)
 
     flag.count = args.find((arg) => !isNaN(parseInt(arg)))
@@ -358,25 +354,11 @@ module.exports = async (ctx, next) => {
     flag.media = args.find((arg) => ['m', 'media'].includes(arg))
     flag.scale = args.find((arg) => arg.match(/s([+-]?(?:\d*\.)?\d+)/))
     flag.crop = args.find((arg) => ['c', 'crop'].includes(arg))
-    flag.ai = args.find((arg) => ['*'].includes(arg))
     flag.html = args.find((arg) => ['h', 'html'].includes(arg))
     flag.stories = args.find((arg) => ['s', 'stories'].includes(arg))
+    flag.legacyStar = args.find((arg) => ['*'].includes(arg))
 
-    // Check if this is an AI query (text without reply that's not just flags/colors)
-    if (fullQuery && !ctx.message.reply_to_message && fullQuery.length > 2) {
-      const knownFlags = ['r', 'reply', 'p', 'png', 'i', 'img', 'rate', 'h', 'hidden', 'm', 'media', 'c', 'crop', '*', 'html', 's', 'stories']
-      const isValidColor = /^(#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}|rgba?\([^)]+\)|[a-zA-Z]+|random|transparent|\/\/[0-9a-fA-F]{6})$/.test(fullQuery.trim())
-      const isOnlyFlags = args.every(arg => knownFlags.includes(arg) || !isNaN(parseInt(arg)) || arg.match(/s([+-]?(?:\d*\.)?\d+)/))
-
-      if (!isValidColor && !isOnlyFlags) {
-        flag.aiQuery = fullQuery
-      }
-    }
-
-    // Only set color if it's not an AI query
-    if (!flag.aiQuery) {
-      flag.color = args.find((arg) => (!Object.values(flag).find((f) => arg === f)))
-    }
+    flag.color = args.find((arg) => (!Object.values(flag).find((f) => arg === f)))
 
     if (flag.scale) flag.scale = flag.scale.match(/s([+-]?(?:\d*\.)?\d+)/)[1]
   }
@@ -473,57 +455,49 @@ module.exports = async (ctx, next) => {
     startMessage -= messageCount - 1
   }
 
-  // Skip message fetching if we already have AI-selected messages
-  if (!flag.aiQuery) {
-    // if firstMessage exists, get messages
-    if (!flag.reply && firstMessage && firstMessage.from.is_bot && firstMessage.message_id === startMessage) {
-      messages.push(firstMessage)
-      startMessage += 1
-      messageCount -= 1
-    }
-
-    if (isCommand && ctx.message.external_reply) {
-      messages.push(Object.assign(ctx.message.external_reply, {
-        message_id: ctx.message.message_id,
-        quote: ctx.message.quote
-      }))
-    }
-
-    const tCollectStart = Date.now()
-    try {
-      const tdlibMessages = await ctx.tdlib.getMessages(ctx.message.chat.id, (() => {
-        const m = []
-        for (let i = 0; i < messageCount; i++) {
-          m.push(startMessage + i)
-        }
-        return m
-      })())
-      messages.push(...tdlibMessages)
-    } catch (error) {
-      console.error('TDLib getMessages failed:', error.message)
-      // Fallback: use only the replied message if available
-      if (firstMessage) {
-        messages.push(firstMessage)
-      } else {
-        return ctx.replyWithHTML(ctx.i18n.t('quote.errors.api_down'), {
-          reply_to_message_id: ctx.message.message_id,
-          allow_sending_without_reply: true
-        })
-      }
-    }
-    ctx.state.collectMs = Date.now() - tCollectStart
+  // if firstMessage exists, get messages
+  if (!flag.reply && firstMessage && firstMessage.from.is_bot && firstMessage.message_id === startMessage) {
+    messages.push(firstMessage)
+    startMessage += 1
+    messageCount -= 1
   }
+
+  if (isCommand && ctx.message.external_reply) {
+    messages.push(Object.assign(ctx.message.external_reply, {
+      message_id: ctx.message.message_id,
+      quote: ctx.message.quote
+    }))
+  }
+
+  const tCollectStart = Date.now()
+  try {
+    const tdlibMessages = await ctx.tdlib.getMessages(ctx.message.chat.id, (() => {
+      const m = []
+      for (let i = 0; i < messageCount; i++) {
+        m.push(startMessage + i)
+      }
+      return m
+    })())
+    messages.push(...tdlibMessages)
+  } catch (error) {
+    console.error('TDLib getMessages failed:', error.message)
+    // Fallback: use only the replied message if available
+    if (firstMessage) {
+      messages.push(firstMessage)
+    } else {
+      return ctx.replyWithHTML(ctx.i18n.t('quote.errors.api_down'), {
+        reply_to_message_id: ctx.message.message_id,
+        allow_sending_without_reply: true
+      })
+    }
+  }
+  ctx.state.collectMs = Date.now() - tCollectStart
 
   messages = messages.filter((message) => message && Object.keys(message).length !== 0)
 
-  // Filter out messages sent by this bot (e.g. Gramads ads that may arrive during collection)
+  // Filter out messages sent by this bot.
   if (ctx.me) {
     messages = messages.filter((message) => !(message.from && message.from.is_bot && message.from.username === ctx.me))
-  }
-
-  // Send Gramads ad after messages are collected to prevent ads from being included in quotes
-  if (ctx.chat.type === 'private' && ctx.from && (ctx.from.language_code === 'ru' || (ctx.session && ctx.session.userInfo && ctx.session.userInfo.settings && ctx.session.userInfo.settings.locale === 'ru'))) {
-    sendGramadsAd(ctx.from.id).catch(() => {})
   }
 
   if (ctx.message.quote && messages[0]) {
@@ -936,116 +910,6 @@ module.exports = async (ctx, next) => {
   for (let i = 0; i < quoteMessages.length - 1; i++) {
     if (quoteMessages[i].chatId === quoteMessages[i + 1].chatId) {
       quoteMessages[i].avatar = false
-    }
-  }
-
-  if (flag.ai) {
-    let messageForAIContext = []
-
-    try {
-      const aiContextMessages = await ctx.tdlib.getMessages(ctx.message.chat.id, (() => {
-        const m = []
-        for (let i = 1; i < 10; i++) {
-          m.push(startMessage - i)
-        }
-        return m
-      })())
-      messageForAIContext.push(...aiContextMessages)
-    } catch (error) {
-      console.error('TDLib getMessages for AI context failed:', error.message)
-      // Continue without AI context if TDLib fails
-      messageForAIContext = []
-    }
-
-    messageForAIContext = messageForAIContext.filter((message) => message && Object.keys(message).length !== 0)
-
-    messageForAIContext = messageForAIContext.map((message) => {
-      if (message.text && message.text.startsWith('/')) return
-
-      const name = message?.from?.title || message.from?.name || message?.from?.first_name + ' ' + message?.from?.last_name || message?.from?.username || 'Anonymous'
-
-      return {
-        role: 'user',
-        name: name,
-        content: (message?.text || message?.caption)?.slice(0, 128)
-      }
-    }).filter((message) => message && message.content)
-
-    const aiMode = (ctx.group && ctx.group.info && ctx.group.info.settings && ctx.group.info.settings.aiMode) || 'sarcastic'
-    const aiModes = require('../config/aiModes')
-    const selectedAiMode = aiModes[aiMode] || aiModes.sarcastic
-
-    const locale = (ctx.group && ctx.group.info && ctx.group.info.settings && ctx.group.info.settings.locale) || 'fallback'
-    const systemMessage = selectedAiMode.systemPrompt(locale) + `
-
-**Chat Examples (style reference):**
-${JSON.stringify(messageForAIContext)}
-`;
-
-
-    const messageForAI = []
-
-    for (const index in quoteMessages) {
-      const quoteMessage = quoteMessages[index]
-
-      let userMessage = {
-        role: 'user',
-        content: quoteMessage?.text?.slice(0, 128) || quoteMessage?.caption?.slice(0, 128) || (quoteMessage.mediaType === 'sticker' ? '[user sent a sticker]' : '[user sent a media]')
-      }
-
-
-      messageForAI.push(userMessage)
-    }
-
-    const openai = getOpenRouterClient()
-    if (!openai) {
-      return ctx.replyWithHTML('AI quote mode is disabled because OPENAI_API_KEY is not configured.', {
-        reply_to_message_id: ctx.message.message_id,
-        allow_sending_without_reply: true
-      })
-    }
-
-    const completion = await openai.chat.completions.create({
-      model: 'x-ai/grok-4.1-fast',
-      messages: [
-        {
-          role: 'system',
-          content: systemMessage
-        },
-        ...messageForAI
-      ],
-      max_tokens: 600,
-
-      temperature: 0.7,
-      retry: 3
-    })
-
-    if (completion?.choices?.length > 0 && completion.choices[0].message?.content) {
-      const message = completion.choices[0].message.content
-
-      quoteMessages.push({
-        message_id: 1,
-        chatId: 6,
-        avatar: true,
-        from: {
-          id: 6,
-          name: 'QuotAI',
-          photo: {
-            url: 'https://telegra.ph/file/20ff3795b173ab91a81e9.jpg'
-          }
-        },
-        text: message.replace(/<|>/g, '').trim(),
-        replyMessage: {}
-      })
-    } else {
-      return ctx.replyWithHTML(`🌙✨ <b>The magic spirits are taking a nap</b>\n\n<i>My AI wizard friend seems to be busy brewing other potions right now.</i>\n\n🔮 <i>Give it a moment and try your spell again! 🪄💫</i>`, {
-        reply_to_message_id: ctx.message.message_id,
-        allow_sending_without_reply: true
-      }).then((res) => {
-        setTimeout(() => {
-          ctx.deleteMessage(res.message_id)
-        }, 8000)
-      })
     }
   }
 

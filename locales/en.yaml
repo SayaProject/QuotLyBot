@@ -180,28 +180,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Timeout Error</b>
       The request took too long. Please try again with a simpler quote.
-  image_to_quote:
-    processing: |
-      🔍 Analyzing image and extracting text...
-    success: |
-      ✅ Quote created from ${count} messages!
-
-      💡 <b>Tip:</b> Send screenshot with <code>/qi</code> or <code>/quote_image</code> caption to create quotes
-    errors:
-      no_image: |
-        ❌ Please send an image file (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ Image is too large. Maximum size: 20MB
-      unsupported_format: |
-        ❌ Unsupported image format. Supported: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Couldn't find readable chat messages in the image. Make sure it's a clear screenshot of a conversation.
-      parse_error: |
-        ❌ Recognition error. The image might not contain clear conversation text.
-      api_error: |
-        ❌ Text recognition error. Please try again.
-      rate_limit: |
-        ⏳ Too many requests! Please wait ${seconds} seconds before trying again.
 sticker:
   save:
     suc: Successfully added to your <a href="${link}">group sticker pack</a> ✨
@@ -230,8 +208,6 @@ sticker:
     not_found: This quote is not in the database 🤔
   empty_forward: |
     Please reply to a sticker, photo, or image you'd like to save ✨
-  fstik: |
-    To save this to your personal sticker pack, forward to @fStikBot 🎨
 rate:
   vote:
     rated: |

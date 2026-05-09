@@ -181,28 +181,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Erro de Tempo Esgotado</b>
       A solicitação demorou muito. Por favor, tente novamente com uma citação mais simples.
-  image_to_quote:
-    processing: |
-      🔍 Analisando a imagem e extraindo o texto...
-    success: |
-      ✅ Citação criada a partir de ${count} mensagens!
-
-      💡 <b>Dica:</b> Envie uma captura de tela com a legenda <code>/qi</code> ou <code>/quote_image</code> para criar citações
-    errors:
-      no_image: |
-        ❌ Por favor, envie um arquivo de imagem (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ A imagem é muito grande. Tamanho máximo: 20MB
-      unsupported_format: |
-        ❌ Formato de imagem não suportado. Suportados: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Não foi possível encontrar mensagens de chat legíveis na imagem. Certifique-se de que seja uma captura de tela clara de uma conversa.
-      parse_error: |
-        ❌ Erro de reconhecimento. A imagem pode não conter texto de conversa claro.
-      api_error: |
-        ❌ Erro de reconhecimento de texto. Por favor, tente novamente.
-      rate_limit: |
-        ⏳ Muitos pedidos! Por favor, espere ${seconds} segundos antes de tentar novamente.
 sticker:
   save:
     suc: Adicionado com sucesso ao seu <a href="${link}">pacote de adesivos do grupo</a> ✨
@@ -229,8 +207,6 @@ sticker:
     not_found: Esta citação não está no banco de dados 🤔
   empty_forward: |
     Por favor, responda a um adesivo, foto ou imagem que você gostaria de salvar ✨
-  fstik: |
-    Para salvar isso no seu pacote pessoal de adesivos, encaminhe para @fStikBot 🎨
 rate:
   vote:
     rated: |

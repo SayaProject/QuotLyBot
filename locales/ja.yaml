@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>タイムアウト エラー</b>
       リクエストに時間がかかりすぎている。より簡単な引用で再度お試しください。
-  image_to_quote:
-    processing: |
-      🔍 画像を分析しテキストを抽出しています...
-    success: |
-      ✅ ${count} 件のメッセージから引用が生成されました！
-
-      💡 <b>ヒント:</b> スクリーンショットに <code>/qi</code> または <code>/quote_image</code> のキャプションを付けて引用を作成してください
-    errors:
-      no_image: |
-        ❌ 画像ファイル (JPG、PNG、WebP) を送信してください
-      file_too_large: |
-        ❌ 画像が大きすぎます。最大サイズ: 20MB
-      unsupported_format: |
-        ❌ サポートされていない画像形式。サポートされている形式: JPG、PNG、WebP
-      no_text_found: |
-        ❌ 画像内に読み取れるチャットメッセージが見つかりませんでした。会話の明瞭なスクリーンショットであることを確認してください。
-      parse_error: |
-        ❌ 認識エラー。画像は明瞭な会話テキストを含んでいない可能性があります。
-      api_error: |
-        ❌ テキスト認識エラー。もう一度お試しください。
-      rate_limit: |
-        ⏳ 多くのリクエストがあります！再試行する前に ${seconds} 秒待ってください。
 sticker:
   save:
     suc: 正常に<a href="${link}">グループステッカーパック</a>に追加されました ✨
@@ -225,8 +203,6 @@ sticker:
     not_found: この引用はデータベースに存在しません 🤔
   empty_forward: |
     保存したいステッカー、写真、画像に返信してください ✨
-  fstik: |
-    個人用ステッカーパックに保存するには、@fStikBot に転送してください 🎨
 rate:
   vote:
     rated: |

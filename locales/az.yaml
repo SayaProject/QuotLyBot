@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Vaxt Aşımı Xətası</b>
       Sorğu çox uzun çəkdi. Daha sadə bir sitatla yenidən cəhd edin.
-  image_to_quote:
-    processing: |
-      🔍 Şəkil təhlil edilir və mətn çıxarılır...
-    success: |
-      ✅ ${count} mesajdan sitat yaradıldı!
-
-      💡 <b>Məsləhət:</b> <code>/qi</code> və ya <code>/quote_image</code> manşeti ilə ekran görüntüsü göndərin
-    errors:
-      no_image: |
-        ❌ Zəhmət olmasa, şəkil faylı (JPG, PNG, WebP) göndərin
-      file_too_large: |
-        ❌ Şəkil çox böyükdür. Maksimum ölçü: 20MB
-      unsupported_format: |
-        ❌ Dəstəklənməyən şəkil formatı. Dəstəklənən: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Şəkildə oxuna bilən chat mesajları tapılmadı. Əmin olun ki, söhbətin dəqiq bir ekran görüntüsü var.
-      parse_error: |
-        ❌ Tanıma xətası. Şəkil açıq olmayan söhbət mətni ehtiva edə bilər.
-      api_error: |
-        ❌ Mətn tanıma xətası. Yenidən cəhd edin.
-      rate_limit: |
-        ⏳ Çoxlu sorğular! Yenidən cəhd etməzdən əvvəl ${seconds} saniyə gözləyin.
 sticker:
   save:
     suc: Uğurla <a href="${link}">qrupun stikerpaka</a> əlavə olundu ✨
@@ -225,8 +203,6 @@ sticker:
     not_found: Bu sitat bazada yoxdur 🤔
   empty_forward: |
     Zəhmət olmasa, saxlamaq istədiyiniz stikeri, fotonu və ya şəkli cavablayın ✨
-  fstik: |
-    Bunu şəxsi stikerpakınıza saxlamaq üçün @fStikBot-a yönləndirin 🎨
 rate:
   vote:
     rated: |

@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Błąd czasu oczekiwania</b>
       Żądanie trwało zbyt długo. Spróbuj ponownie z prostszym cytatem.
-  image_to_quote:
-    processing: |
-      🔍 Analizowanie obrazu i wyciąganie tekstu...
-    success: |
-      ✅ Cytat stworzony z ${count} wiadomości!
-
-      💡 <b>Wskazówka:</b> Wyślij zrzut ekranu z podpisem <code>/qi</code> lub <code>/quote_image</code>, aby stworzyć cytaty
-    errors:
-      no_image: |
-        ❌ Proszę wyślij plik graficzny (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ Obraz jest za duży. Maksymalny rozmiar: 20MB
-      unsupported_format: |
-        ❌ Niewspierany format obrazu. Obsługiwane: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Nie udało się znaleźć czytelnych wiadomości czatu na obrazie. Upewnij się, że to wyraźny zrzut rozmowy.
-      parse_error: |
-        ❌ Błąd rozpoznania. Obraz może nie zawierać wyraźnego tekstu rozmowy.
-      api_error: |
-        ❌ Błąd rozpoznania tekstu. Spróbuj ponownie.
-      rate_limit: |
-        ⏳ Zbyt wiele żądań! Poczekaj ${seconds} sekund przed ponowną próbą.
 sticker:
   save:
     suc: Pomyślnie dodano do Twojego <a href="${link}">pakietu naklejek grupy</a> ✨
@@ -225,8 +203,6 @@ sticker:
     not_found: Tego cytatu nie ma w bazie danych 🤔
   empty_forward: |
     Odpowiedz na naklejkę, zdjęcie lub obraz, który chcesz zapisać ✨
-  fstik: |
-    Aby zapisać to do swojego osobistego pakietu naklejek, przekaż do @fStikBot 🎨
 rate:
   vote:
     rated: |

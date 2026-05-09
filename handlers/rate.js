@@ -56,22 +56,24 @@ module.exports = async ctx => {
       ]
     }).catch(() => {})
   } else {
-    const advKeyboard = ctx.callbackQuery.message.reply_markup.inline_keyboard.pop().pop()
+    const currentRows = ctx.callbackQuery.message.reply_markup?.inline_keyboard || []
+    const urlButton = currentRows.flat().find(button => button.url)
+    const rows = [
+      [
+        {
+          text: `👍 ${quoteDb.rate.votes[0].vote.length || ''}`,
+          callback_data: 'rate:👍'
+        },
+        {
+          text: `👎 ${quoteDb.rate.votes[1].vote.length || ''}`,
+          callback_data: 'rate:👎'
+        }
+      ]
+    ]
+    if (urlButton) rows.push([urlButton])
 
     await ctx.editMessageReplyMarkup({
-      inline_keyboard: [
-        [
-          {
-            text: `👍 ${quoteDb.rate.votes[0].vote.length || ''}`,
-            callback_data: 'rate:👍'
-          },
-          {
-            text: `👎 ${quoteDb.rate.votes[1].vote.length || ''}`,
-            callback_data: 'rate:👎'
-          }
-        ],
-        advKeyboard.url ? [advKeyboard] : []
-      ]
+      inline_keyboard: rows
     }).catch(() => {})
   }
 }

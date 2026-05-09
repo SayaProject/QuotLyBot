@@ -5,14 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Common Development Commands
 
 ### Running the Bot
-- **Start**: `npm start` (runs `node index.js`)
-- **Development**: `node index.js` (direct execution)
+- **Start**: `npm start` (runs `node railway-start.js`)
+- **Collector only**: `npm run start:collector`
+- **Worker only**: `npm run start:worker`
 - **PM2 Production**: `pm2 start ecosystem.config.js` (cluster mode with health checker)
 - **Docker**: `docker compose --profile dev up -d` (requires quote-api setup)
 
 ### Code Quality
 - **Lint**: `npx eslint .` (ESLint with Standard config)
-- **Test**: No test suite configured (displays error message)
+- **Test**: `npm test`
 
 ### Process Management
 - **Health Check**: Bot runs health endpoint on port configured in environment
@@ -23,9 +24,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Cluster Architecture
 The bot uses Node.js cluster mode with a master-worker pattern:
 
-- **Master Process** (`master.js`): Handles load balancing, queue management, TDLib operations, and health monitoring
-- **Worker Processes** (`worker.js`): Process individual Telegram updates
-- **Queue Manager** (`queueManager.js`): Manages update queues with priority handling and backpressure
+- **Collector Process** (`updates-collector.js`): Receives Telegram updates, assigns queues, and owns TDLib operations
+- **Worker Processes** (`updates-worker.js`): Process queued Telegram updates
+- **Railway Starter** (`railway-start.js`): Runs one collector, configurable workers, and `/health`
 
 ### Key Components
 
@@ -36,12 +37,11 @@ The bot uses Node.js cluster mode with a master-worker pattern:
 
 #### Quote Generation System
 - **Quote API**: External service for generating quote images (quote-api repo)
-- **AI Integration**: OpenAI/Anthropic APIs for smart message selection and content generation
 - **Sticker Management**: Dynamic sticker pack creation and cleanup
 
 #### Database Layer
 - **MongoDB**: Uses Mongoose for data modeling
-- **Models**: User, Group, Quote, Stats, Advertisement, Invoice models
+- **Models**: User, Group, GroupMember, Quote, Counter, and Stats models
 - **Caching**: In-memory caching for privacy settings and forward lookups
 
 #### Message Processing
@@ -53,7 +53,6 @@ The bot uses Node.js cluster mode with a master-worker pattern:
 
 #### Quote Generation
 - **Multi-format**: Supports WebP stickers, PNG images, and documents
-- **AI-powered**: Smart message selection using natural language queries
 - **Customization**: Background colors, emoji brands, scaling options
 - **Privacy**: Configurable privacy settings for user anonymization
 
@@ -66,16 +65,17 @@ The bot uses Node.js cluster mode with a master-worker pattern:
 #### Advanced Features
 - **Business API**: Support for Telegram Business connections
 - **Inline Queries**: Inline bot functionality
-- **Advertisement System**: Built-in ad management
 - **Statistics**: Usage tracking and analytics
 
 ## Configuration
 
 ### Environment Variables
 - `BOT_TOKEN`: Telegram bot token
-- `OPENAI_API_KEY`: OpenRouter API key for AI features
-- `ANTHROPIC_API_KEY`: Anthropic API key for AI features
+- `MONGODB_URI`: MongoDB connection string
+- `REDIS_URL`: Redis connection string
 - `QUOTE_API_URI`: Quote generation API endpoint
+- `TELEGRAM_API_ID`: Telegram API ID for TDLib
+- `TELEGRAM_API_HASH`: Telegram API hash for TDLib
 - `MAX_WORKERS`: Number of worker processes
 - `WORKER_HANDLER_TIMEOUT`: Timeout for worker operations
 
@@ -107,8 +107,6 @@ The bot uses Node.js cluster mode with a master-worker pattern:
 - Caching reduces database queries
 - Circuit breaker prevents TDLib cascade failures
 
-### AI Integration
-- Smart message selection with GPT-4 models
-- Image processing for AI analysis
-- Context-aware response generation
-- Fallback handling for API failures
+### Removed Optional Integrations
+
+This Railway-ready fork does not include the optional AI, ads/payments, or FSTIK publisher integrations.

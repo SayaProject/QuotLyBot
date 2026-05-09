@@ -181,28 +181,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Errore Di Timeout</b>
       La richiesta ha impiegato troppo tempo. Riprova con una citazione più semplice.
-  image_to_quote:
-    processing: |
-      🔍 Analizzando l'immagine ed estraendo il testo...
-    success: |
-      ✅ Citazione creata da ${count} messaggi!
-
-      💡 <b>Consiglio:</b> Invia uno screenshot con <code>/qi</code> o <code>/quote_image</code> per creare citazioni
-    errors:
-      no_image: |
-        ❌ Per favore invia un file immagine (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ Immagine troppo grande. Dimensione massima: 20MB
-      unsupported_format: |
-        ❌ Formato immagine non supportato. Supportati: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Impossibile trovare messaggi di chat leggibili nell'immagine. Assicurati che sia uno screenshot chiaro di una conversazione.
-      parse_error: |
-        ❌ Errore di riconoscimento. L'immagine potrebbe non contenere testo di conversazione chiaro.
-      api_error: |
-        ❌ Errore di riconoscimento del testo. Per favore riprova.
-      rate_limit: |
-        ⏳ Troppe richieste! Attendi ${seconds} secondi prima di riprovare.
 sticker:
   save:
     suc: Lo sticker è stato aggiunto con successo al tuo <a href="${link}">pacchetto di adesivi del gruppo</a> ✨
@@ -229,8 +207,6 @@ sticker:
     not_found: Questa citazione non è nel database 🤔
   empty_forward: |
     Per favore, rispondi a uno sticker, foto o immagine che vuoi salvare ✨
-  fstik: |
-    Per salvare questo nel tuo pacchetto personale di sticker, inoltra a @fStikBot 🎨
 rate:
   vote:
     rated: |

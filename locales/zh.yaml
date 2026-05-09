@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>超时错误</b>
       请求耗时过长，请尝试使用更简单的引用重试。
-  image_to_quote:
-    processing: |
-      🔍 正在分析图像并提取文本...
-    success: |
-      ✅ 已从 ${count} 条消息中创建引用！
-
-      💡 <b>提示：</b>发送截图并添加<code>/qi</code>或<code>/quote_image</code>标题以创建引用
-    errors:
-      no_image: |
-        ❌ 请发送图像文件（JPG, PNG, WebP)
-      file_too_large: |
-        ❌ 图像过大。最大尺寸：20MB
-      unsupported_format: |
-        ❌ 不支持的图像格式。支持格式：JPG, PNG, WebP
-      no_text_found: |
-        ❌ 无法在图像中找到可读的聊天消息。请确保这是对话的明确截图。
-      parse_error: |
-        ❌ 识别错误。图像可能不包含清晰的对话文本。
-      api_error: |
-        ❌ 文本识别错误。请再试一次。
-      rate_limit: |
-        ⏳ 请求次数过多！请等待 ${seconds} 秒后再试。
 sticker:
   save:
     suc: 成功添加到您的<a href="${link}">群组贴纸包</a>✨
@@ -225,8 +203,6 @@ sticker:
     not_found: 此引用不在数据库中 🤔
   empty_forward: |
     请回复您想保存的贴纸、照片或图片✨
-  fstik: |
-    为了将此保存到您的个人贴纸包，请转发到 @fStikBot 🎨
 rate:
   vote:
     rated: |

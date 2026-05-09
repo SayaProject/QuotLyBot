@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Vaqt Tugash Xatosi</b>
       So'rov juda uzoq vaqt oldi. Iltimos, yanada oddiy iqtibos bilan yana urinib ko'ring.
-  image_to_quote:
-    processing: |
-      🔍 Rasmni tahlil qilinmoqda va matn olinmoqda...
-    success: |
-      ✅ ${count} xabardan iqtibos yaratildi!
-
-      💡 <b>Maslahat:</b> Iqtiboslar yaratish uchun <code>/qi</code> yoki <code>/quote_image</code> sarlavhali skrinshotni yuboring
-    errors:
-      no_image: |
-        ❌ Iltimos, rasm fayli yuboring (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ Rasm juda katta. Maksimal o'lcham: 20MB
-      unsupported_format: |
-        ❌ Qo'llab-quvvatlanmaydigan rasm formati. Qo'llab-quvvatlanadiganlar: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Rasmda o'qiladigan chat xabarlari topilmadi. Suhbat skrinshotining aniq ekanligiga ishonch hosil qiling.
-      parse_error: |
-        ❌ Tanib olish xatosi. Rasmda aniq suhbat matnlari yo'q bo'lishi mumkin.
-      api_error: |
-        ❌ Matn tanib olish xatosi. Iltimos, yana urinib ko'ring.
-      rate_limit: |
-        ⏳ Juda ko'p so'rovlar! Iltimos, yana urinib ko'rishdan oldin ${seconds} soniya kuting.
 sticker:
   save:
     suc: Stiker muvaffaqiyatli ravishda <a href="${link}">stikerlar to'plami guruhiga qo'shildi</a> ✨
@@ -225,8 +203,6 @@ sticker:
     not_found: Ushbu iqtibos ma'lumotlar bazasida mavjud emas 🤔
   empty_forward: |
     Iltimos, saqlamoqchi bo'lgan stiker, foto yoki rasmga javob bering ✨
-  fstik: |
-    Buni shaxsiy stikerlar to'plamingizga saqlab qo'yish uchun, @fStikBot ga forward qiling 🎨
 rate:
   vote:
     rated: |

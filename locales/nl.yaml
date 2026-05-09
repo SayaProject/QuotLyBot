@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Timeout Fout</b>
       De aanvraag duurde te lang. Probeer opnieuw met een simpelere quote.
-  image_to_quote:
-    processing: |
-      🔍 Beeld analyseren en tekst extraheren...
-    success: |
-      ✅ Quote gemaakt van ${count} berichten!
-
-      💡 <b>Tip:</b> Stuur schermafbeelding met <code>/qi</code> of <code>/quote_image</code> onderschrift om quotes te maken
-    errors:
-      no_image: |
-        ❌ Stuur een afbeeldingsbestand (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ Afbeelding is te groot. Maximale grootte: 20MB
-      unsupported_format: |
-        ❌ Niet ondersteund afbeeldingsformaat. Ondersteund: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Kon geen leesbare chatberichten in de afbeelding vinden. Zorg dat het een duidelijke schermafbeelding van een gesprek is.
-      parse_error: |
-        ❌ Herkenningsfout. De afbeelding bevat mogelijk geen duidelijke gesprekstekst.
-      api_error: |
-        ❌ Tekstherkenningsfout. Probeer het opnieuw.
-      rate_limit: |
-        ⏳ Te veel verzoeken! Wacht alstublieft ${seconds} seconden voordat je het opnieuw probeert.
 sticker:
   save:
     suc: Succesvol toegevoegd aan je <a href="${link}">groepssticker pakket</a> ✨
@@ -225,8 +203,6 @@ sticker:
     not_found: Dit citaat staat niet in de database 🤔
   empty_forward: |
     Reageer op een sticker, foto of afbeelding die je wilt opslaan ✨
-  fstik: |
-    Om dit op te slaan naar je persoonlijke stickerpakket, stuur door naar @fStikBot 🎨
 rate:
   vote:
     rated: |

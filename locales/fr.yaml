@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Erreur de délai d'attente</b>
       La demande a pris trop de temps. Veuillez réessayer avec une citation plus simple.
-  image_to_quote:
-    processing: |
-      🔍 Analyse de l'image et extraction du texte...
-    success: |
-      ✅ Citation créée à partir de ${count} messages !
-
-      💡 <b>Astuce :</b> Envoyez une capture d'écran avec la légende <code>/qi</code> ou <code>/quote_image</code> pour créer des citations
-    errors:
-      no_image: |
-        ❌ Veuillez envoyer un fichier image (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ L'image est trop grande. Taille maximale : 20 Mo
-      unsupported_format: |
-        ❌ Format d'image non pris en charge. Prise en charge : JPG, PNG, WebP
-      no_text_found: |
-        ❌ Impossible de trouver des messages de chat lisibles dans l'image. Assurez-vous qu'il s'agit d'une capture d'écran claire d'une conversation.
-      parse_error: |
-        ❌ Erreur de reconnaissance. L'image pourrait ne pas contenir de texte de conversation clair.
-      api_error: |
-        ❌ Erreur de reconnaissance de texte. Veuillez réessayer.
-      rate_limit: |
-        ⏳ Trop de demandes ! Veuillez attendre ${seconds} secondes avant de réessayer.
 sticker:
   save:
     suc: Ajouté avec succès à votre <a href="${link}">pack d'autocollants du groupe</a> ✨
@@ -225,8 +203,6 @@ sticker:
     not_found: Cette citation n'est pas dans la base de données 🤔
   empty_forward: |
     Veuillez répondre à un autocollant, une photo ou une image que vous souhaitez enregistrer ✨
-  fstik: |
-    Pour l'enregistrer dans votre pack d'autocollants personnel, transférez à @fStikBot 🎨
 rate:
   vote:
     rated: |

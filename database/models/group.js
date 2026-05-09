@@ -40,10 +40,6 @@ const groupSchema = Schema({
       type: Number,
       default: 800
     },
-    aiMode: {
-      type: String,
-      default: 'sarcastic'
-    },
     archive: {
       storeText: {
         type: Boolean,

@@ -175,28 +175,6 @@ quote:
     timeout_error: |
       ⏱️ <b>Kesalahan Timeout</b>
       Permintaan terlalu lama. Silakan coba lagi dengan kutipan yang lebih sederhana.
-  image_to_quote:
-    processing: |
-      🔍 Menganalisis gambar dan mengekstrak teks...
-    success: |
-      ✅ Kutipan dibuat dari ${count} pesan!
-
-      💡 <b>Tip:</b> Kirim tangkapan layar dengan deskripsi <code>/qi</code> atau <code>/quote_image</code> untuk membuat kutipan
-    errors:
-      no_image: |
-        ❌ Silakan kirim file gambar (JPG, PNG, WebP)
-      file_too_large: |
-        ❌ Gambar terlalu besar. Ukuran maksimum: 20MB
-      unsupported_format: |
-        ❌ Format gambar tidak didukung. Yang didukung: JPG, PNG, WebP
-      no_text_found: |
-        ❌ Tidak bisa menemukan pesan obrolan yang dapat dibaca dalam gambar. Pastikan itu adalah tangkapan layar percakapan yang jelas.
-      parse_error: |
-        ❌ Kesalahan pengenalan. Mungkin gambar tidak berisi teks percakapan yang jelas.
-      api_error: |
-        ❌ Kesalahan pengenalan teks. Silakan coba lagi.
-      rate_limit: |
-        ⏳ Terlalu banyak permintaan! Silakan tunggu ${seconds} detik sebelum mencoba lagi.
 sticker:
   save:
     suc: Stiker telah berhasil ditambahkan ke <a href="${link}">paket stiker grup</a> ✨
@@ -225,8 +203,6 @@ sticker:
     not_found: Kutipan ini tidak ada dalam database 🤔
   empty_forward: |
     Silakan balas pada stiker, foto, atau gambar yang ingin Anda simpan ✨
-  fstik: |
-    Untuk menyimpan di paket stiker pribadi Anda, teruskan ke @fStikBot 🎨
 rate:
   vote:
     rated: |

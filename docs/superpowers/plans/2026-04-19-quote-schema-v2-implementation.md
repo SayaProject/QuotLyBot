@@ -68,9 +68,7 @@ module.exports = {
   Group: require('./group'),
   Quote: require('./quote'),
   Counter: require('./counter'),
-  Stats: require('./stats'),
-  Adv: require('./adv'),
-  Invoice: require('./invoice')
+  Stats: require('./stats')
 }
 ```
 
@@ -281,10 +279,6 @@ const groupSchema = Schema({
     randomQuoteGab: {
       type: Number,
       default: 800
-    },
-    aiMode: {
-      type: String,
-      default: 'sarcastic'
     },
     archive: {
       storeText: {
@@ -926,8 +920,6 @@ const { handleMenuCallback } = require('./menu')
 module.exports = {
   handleStart: require('./start'),
   handleHelp: require('./help'),
-  handleAdv: require('./adv'),
-  handleModerateAdv: require('./adv-moderate'),
   handleQuote: require('./quote'),
   handleGetQuote: require('./get'),
   handleTopQuote: require('./top'),
@@ -944,10 +936,6 @@ module.exports = {
   handleSettingsRate: require('./rate-settings'),
   handlePrivacy: require('./privacy-settings'),
   handleLanguage: require('./language'),
-  handleAiMode: require('./ai-mode'),
-  handleFstik: require('./fstik'),
-  handleSticker: require('./sticker'),
-  handleDonate: require('./donate'),
   handlePing: require('./ping'),
   handleChatMember: require('./chat-member'),
   handleInlineQuery: require('./inline-query'),

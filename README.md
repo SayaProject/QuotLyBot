@@ -1,6 +1,6 @@
-# QuotLy Bot 💬✨
+# QuotLy Bot
 
-A powerful Telegram bot that creates beautiful quote stickers from chat messages with AI-powered features.
+A Telegram bot that creates beautiful quote stickers from chat messages.
 
 [![time tracker](https://wakatime.com/badge/github/LyoSU/quote-bot.svg)](https://wakatime.com/badge/github/LyoSU/quote-bot)
 
@@ -114,8 +114,6 @@ This repository includes `railway.json`, `.env.example`, and a single-container 
 | `REDIS_URL` | Redis connection string. `REDIS_HOST`/`REDIS_PORT` can be used instead. | Yes |
 | `TELEGRAM_API_ID` | Telegram API ID for TDLib | Yes |
 | `TELEGRAM_API_HASH` | Telegram API hash for TDLib | Yes |
-| `OPENAI_API_KEY` | OpenRouter API key for AI features | No |
-| `ANTHROPIC_API_KEY` | Anthropic API key for AI features | No |
 | `MAX_WORKERS` | Number of worker processes | No |
 | `WORKER_HANDLER_TIMEOUT` | Worker timeout in milliseconds | No |
 | `WORKER_CONCURRENT_LIMIT` | Max concurrent updates per worker | No |
@@ -131,7 +129,6 @@ This repository includes `railway.json`, `.env.example`, and a single-container 
 
 - `/q` - Create a quote from replied message
 - `/q <number>` - Create quote from multiple messages
-- `/q <text>` - AI-powered message search and quote creation
 - `/qrand` - Random quote from chat history
 - `/qtop` - Top-rated quotes
 - `/help` - Show help message
@@ -145,12 +142,6 @@ This repository includes `railway.json`, `.env.example`, and a single-container 
 - `/q <color>` - Set custom background color
 - `/q s1.5` - Scale factor (1.5x larger)
 - `/q c` - Crop image content
-
-### AI Features
-
-- `/q * <query>` - AI-powered message selection
-- Example: `/q * funny moments` - Find and quote funny messages
-- Example: `/q * jokes from John` - Find jokes from specific user
 
 ### Admin Commands
 
@@ -171,7 +162,6 @@ The bot uses a sophisticated cluster architecture:
 
 ### Key Components
 - **Quote Generation**: External API service for image generation
-- **AI Integration**: OpenAI/Anthropic APIs for smart features
 - **Database Layer**: MongoDB with Mongoose ODM
 - **Redis Queue**: Collector distributes Telegram updates to worker queues
 - **Railway Starter**: `railway-start.js` runs collector, workers, and `/health`
@@ -237,9 +227,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Telegraf](https://telegraf.js.org/) - Modern Telegram Bot Framework
 - [TDLib](https://core.telegram.org/tdlib) - Telegram Database Library
-- [OpenRouter](https://openrouter.ai/) - AI API Gateway
-- [Anthropic](https://anthropic.com/) - Claude AI Platform
 
 ---
 
-Made with ❤️ by [LyoSU](https://github.com/LyoSU)
+Made by [LyoSU](https://github.com/LyoSU)

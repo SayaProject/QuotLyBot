@@ -4,7 +4,5 @@ module.exports = {
   GroupMember: require('./groupMember'),
   Quote: require('./quote'),
   Counter: require('./counter'),
-  Stats: require('./stats'),
-  Adv: require('./adv'),
-  Invoice: require('./invoice')
+  Stats: require('./stats')
 }
