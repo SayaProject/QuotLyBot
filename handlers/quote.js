@@ -15,6 +15,7 @@ const denormalizeQuote = require('../utils/denormalize-quote')
 const buildQuoteReplyMarkup = require('../utils/build-quote-reply-markup')
 const persistQuoteArtifacts = require('../utils/persist-quote-artifacts')
 const persistUserSetting = require('../helpers/persist-user-setting')
+const { isStickerSetInvalidError } = require('../utils/telegram-errors')
 
 // Config will be loaded asynchronously through context
 let config = null
@@ -39,6 +40,12 @@ function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+function stopClearStickerPack () {
+  if (!clearStickerPackTimer) return
+  clearInterval(clearStickerPackTimer)
+  clearStickerPackTimer = null
+}
+
 // Cleans old stickers from the sticker pack periodically
 async function startClearStickerPack(stickerConfig = null) {
   if (clearStickerPackTimer) return
@@ -57,13 +64,20 @@ async function startClearStickerPack(stickerConfig = null) {
       if (!botInfo) botInfo = await telegram.getMe()
 
       const configToUse = stickerConfig || config || { globalStickerSet: { save_sticker_count: 10, name: 'default' } }
+      const stickerSetName = configToUse.globalStickerSet.name + botInfo.username
 
       // Add timeout to prevent hanging
       const stickerSet = await Promise.race([
-        telegram.getStickerSet(configToUse.globalStickerSet.name + botInfo.username),
+        telegram.getStickerSet(stickerSetName),
         new Promise((_, reject) => setTimeout(() => reject(new Error('getStickerSet timeout')), 10000))
       ]).catch((error) => {
-        console.log('clearStickerPack error:', error)
+        if (isStickerSetInvalidError(error)) {
+          console.warn(`[sticker-cleanup] Sticker set "${stickerSetName}" does not exist; cleanup disabled until restart.`)
+          stopClearStickerPack()
+          return null
+        }
+
+        console.error('clearStickerPack error:', error)
         return null
       })
 
@@ -97,9 +111,7 @@ async function startClearStickerPack(stickerConfig = null) {
 
   // Add cleanup on process exit
   process.once('SIGTERM', () => {
-    if (clearStickerPackTimer) {
-      clearInterval(clearStickerPackTimer)
-    }
+    stopClearStickerPack()
   })
 }
 
