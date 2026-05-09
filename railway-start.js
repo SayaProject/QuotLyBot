@@ -121,10 +121,13 @@ function healthPayload () {
   const allRunning = processes.length === expectedProcessCount && processes.every((processInfo) => processInfo.running)
   const startupGraceMs = Number.parseInt(process.env.HEALTH_STARTUP_GRACE_MS || '5000', 10)
   const warmedUp = Date.now() - startedAt >= startupGraceMs
+  const warmingUpMsRemaining = Math.max(0, startupGraceMs - (Date.now() - startedAt))
 
   return {
     status: allRunning && warmedUp ? 'healthy' : 'starting',
+    allRunning,
     uptime: process.uptime(),
+    warmingUpMsRemaining,
     workerCount: getMaxWorkers(),
     processes
   }
@@ -140,8 +143,10 @@ function startHealthServer () {
     }
 
     const payload = healthPayload()
-    const healthy = payload.status === 'healthy'
-    res.writeHead(healthy ? 200 : 503, { 'Content-Type': 'application/json' })
+    // Railway's healthcheck needs a 2xx response once the supervisor is
+    // listening. Child process failures still stop the supervisor, so startup
+    // state is reported in JSON instead of as HTTP 503.
+    res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify(payload))
   })
 
