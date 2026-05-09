@@ -12,4 +12,3 @@ logs
 coverage
 .nyc_output
 helpers/tdlib/data
-config.json
