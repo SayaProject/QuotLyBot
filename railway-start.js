@@ -54,10 +54,17 @@ function validateEnv () {
   }
 }
 
+function addNodeOption (currentOptions, option) {
+  const options = currentOptions ? currentOptions.split(/\s+/).filter(Boolean) : []
+  if (!options.includes(option)) options.push(option)
+  return options.join(' ')
+}
+
 function startChild (name, script, extraEnv = {}) {
   const child = spawn(process.execPath, [script], {
     env: {
       ...process.env,
+      NODE_OPTIONS: addNodeOption(process.env.NODE_OPTIONS, '--disable-warning=DEP0040'),
       ...extraEnv
     },
     stdio: 'inherit'

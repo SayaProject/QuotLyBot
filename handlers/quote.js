@@ -1,5 +1,6 @@
 const Telegram = require('telegraf/telegram')
 const fs = require('fs')
+const path = require('path')
 const slug = require('limax')
 const EmojiDbLib = require('emoji-db')
 
@@ -16,22 +17,26 @@ const buildQuoteReplyMarkup = require('../utils/build-quote-reply-markup')
 const persistQuoteArtifacts = require('../utils/persist-quote-artifacts')
 const persistUserSetting = require('../helpers/persist-user-setting')
 const { isStickerSetInvalidError } = require('../utils/telegram-errors')
+const { getStickerCleanupSetName, isStickerCleanupEnabled, normalizeQuoteConfig } = require('../utils/quote-config')
 
 // Config will be loaded asynchronously through context
-let config = null
+let config = normalizeQuoteConfig()
+const configPath = path.resolve(__dirname, '..', 'config.json')
 
 // Initialize config asynchronously
 const initConfig = async () => {
   try {
-    const configData = await fs.promises.readFile('./config.json', 'utf8')
-    config = JSON.parse(configData)
+    const configData = await fs.promises.readFile(configPath, 'utf8')
+    config = normalizeQuoteConfig(JSON.parse(configData))
   } catch (error) {
-    console.error('Error loading config in quote handler:', error)
-    config = { globalStickerSet: { save_sticker_count: 10, name: 'default' } }
+    config = normalizeQuoteConfig()
+    if (error.code !== 'ENOENT') {
+      console.error(`Error loading config in quote handler: ${error.message}`)
+    }
   }
 }
 
-initConfig()
+const configReady = initConfig()
 
 let botInfo
 let clearStickerPackTimer
@@ -48,6 +53,7 @@ function stopClearStickerPack () {
 
 // Cleans old stickers from the sticker pack periodically
 async function startClearStickerPack(stickerConfig = null) {
+  if (!isStickerCleanupEnabled(stickerConfig || config)) return
   if (clearStickerPackTimer) return
 
   let isRunning = false
@@ -63,8 +69,12 @@ async function startClearStickerPack(stickerConfig = null) {
     try {
       if (!botInfo) botInfo = await telegram.getMe()
 
-      const configToUse = stickerConfig || config || { globalStickerSet: { save_sticker_count: 10, name: 'default' } }
-      const stickerSetName = configToUse.globalStickerSet.name + botInfo.username
+      const configToUse = normalizeQuoteConfig(stickerConfig || config)
+      const stickerSetName = getStickerCleanupSetName(configToUse, botInfo.username)
+      if (!stickerSetName) {
+        stopClearStickerPack()
+        return
+      }
 
       // Add timeout to prevent hanging
       const stickerSet = await Promise.race([
@@ -336,7 +346,7 @@ const handleQuoteError = async (ctx, error) => {
 module.exports = async (ctx, next) => {
   const t0 = Date.now()
   // Use config from context if available, fallback to local config
-  const currentConfig = ctx.config || config || { globalStickerSet: { save_sticker_count: 10, name: 'default' } }
+  const currentConfig = normalizeQuoteConfig(ctx.config || config)
   const flag = {
     count: false,
     reply: false,
@@ -1320,6 +1330,8 @@ module.exports = async (ctx, next) => {
 }
 
 // Initialize sticker pack cleaning with delay to allow config loading
-setTimeout(() => {
+configReady.then(() => {
   startClearStickerPack(config)
-}, 1000)
+}).catch((error) => {
+  console.error(`Error initializing sticker cleanup: ${error.message}`)
+})

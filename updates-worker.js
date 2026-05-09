@@ -4,14 +4,15 @@ const fs = require('fs')
 const { Telegraf } = require('telegraf')
 const { createRedisClient } = require('./utils/redis')
 const { getMaxWorkers, getWorkerConcurrentLimit, getWorkerHandlerTimeout, getWorkerIndex } = require('./utils/worker-config')
+const { normalizeQuoteConfig } = require('./utils/quote-config')
 const { db } = require('./database')
 const { stats } = require('./middlewares')
 
 // Cache config at startup
-let cachedConfig = {}
+let cachedConfig = normalizeQuoteConfig()
 try {
   if (fs.existsSync('./config.json')) {
-    cachedConfig = JSON.parse(fs.readFileSync('./config.json', 'utf8'))
+    cachedConfig = normalizeQuoteConfig(JSON.parse(fs.readFileSync('./config.json', 'utf8')))
   }
 } catch (error) {
   console.error('Error loading config:', error.message)
