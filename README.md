@@ -23,10 +23,11 @@ A powerful Telegram bot that creates beautiful quote stickers from chat messages
 ## Installation 📦
 
 ### Prerequisites
-- Node.js 16+
+- Node.js 22+
 - MongoDB database
+- Redis database
 - [quote-api](https://github.com/LyoSU/quote-api) service
-- TDLib binary
+- Telegram API ID and hash for TDLib
 
 ### Quick Start
 
@@ -48,14 +49,25 @@ A powerful Telegram bot that creates beautiful quote stickers from chat messages
    ```
 
 4. **Set up TDLib**
-   - Download TDLib binary for your platform
-   - Place it at `helpers/tdlib/data/libtdjson.so` (Linux) or `helpers/tdlib/data/libtdjson.dylib` (macOS)
-   - Or use the prebuilt-tdlib npm package
+   - The bot uses the `prebuilt-tdlib` npm package by default.
+   - Set `TELEGRAM_API_ID` and `TELEGRAM_API_HASH` in your environment.
 
 5. **Start the bot**
    ```bash
    npm start
    ```
+
+### Railway Deployment 🚆
+
+This repository includes `railway.json`, `.env.example`, and a single-container starter for Railway.
+
+1. Create or connect this GitHub repository in Railway.
+2. Add Redis and MongoDB services, or provide external `REDIS_URL` and `MONGODB_URI` values.
+3. Add all required variables from `.env.example` in the Railway service variables tab.
+4. Deploy the [quote-api](https://github.com/LyoSU/quote-api) service separately and set `QUOTE_API_URI` to that service URL.
+5. Deploy. Railway will build with the Dockerfile, run `npm start`, and check `/health`.
+
+`npm start` runs one update collector plus `MAX_WORKERS` worker processes. Use `npm run start:collector` or `npm run start:worker` only when you intentionally want to run one role by itself.
 
 ### Docker Installation 🐳
 
@@ -97,12 +109,17 @@ A powerful Telegram bot that creates beautiful quote stickers from chat messages
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `BOT_TOKEN` | Telegram bot token from @BotFather | Yes |
-| `MONGODB_URI` | MongoDB connection string | Yes |
+| `MONGODB_URI` | MongoDB connection string. `MONGO_URL`, `MONGO_PRIVATE_URL`, or `MONGO_PUBLIC_URL` are also accepted as Railway aliases. | Yes |
 | `QUOTE_API_URI` | Quote generation API endpoint | Yes |
+| `REDIS_URL` | Redis connection string. `REDIS_HOST`/`REDIS_PORT` can be used instead. | Yes |
+| `TELEGRAM_API_ID` | Telegram API ID for TDLib | Yes |
+| `TELEGRAM_API_HASH` | Telegram API hash for TDLib | Yes |
 | `OPENAI_API_KEY` | OpenRouter API key for AI features | No |
 | `ANTHROPIC_API_KEY` | Anthropic API key for AI features | No |
 | `MAX_WORKERS` | Number of worker processes | No |
 | `WORKER_HANDLER_TIMEOUT` | Worker timeout in milliseconds | No |
+| `WORKER_CONCURRENT_LIMIT` | Max concurrent updates per worker | No |
+| `PORT` | HTTP port for Railway health checks | No |
 
 ### Database Setup
 - MongoDB is required for storing user data, quotes, and statistics
@@ -156,7 +173,8 @@ The bot uses a sophisticated cluster architecture:
 - **Quote Generation**: External API service for image generation
 - **AI Integration**: OpenAI/Anthropic APIs for smart features
 - **Database Layer**: MongoDB with Mongoose ODM
-- **Health Monitoring**: Circuit breaker pattern and health checks
+- **Redis Queue**: Collector distributes Telegram updates to worker queues
+- **Railway Starter**: `railway-start.js` runs collector, workers, and `/health`
 
 ## Development 👨‍💻
 
@@ -189,10 +207,10 @@ quote-bot/
 ├── helpers/           # Utility functions and TDLib
 ├── locales/           # Internationalization files
 ├── utils/             # General utilities
-├── master.js          # Master process (cluster mode)
-├── worker.js          # Worker processes
-├── bot.js             # Main bot instance
-└── index.js           # Entry point
+├── updates-collector.js # Telegram update collector
+├── updates-worker.js    # Update processor worker
+├── railway-start.js     # Railway single-container process manager
+└── handler.js           # Main bot composer
 ```
 
 ## API Integration 🔗

@@ -4,6 +4,7 @@ let retryCount = 0
 const MAX_RETRY_ATTEMPTS = 10
 const RETRY_DELAY = 5000
 let isConnecting = false
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.MONGO_PRIVATE_URL || process.env.MONGO_PUBLIC_URL
 
 // Promise that resolves when DB is connected
 let readyResolve
@@ -36,7 +37,11 @@ const connectWithRetry = async () => {
   isConnecting = true
 
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
+    if (!mongoUri) {
+      throw new Error('MONGODB_URI is required')
+    }
+
+    await mongoose.connect(mongoUri, {
       // Each /q issues ~8 Mongo ops (session user/group lookup, Group $inc,
       // Counter $inc, Quote.create, GroupMember bulkWrite, User.updateOne).
       // Under 40 /q/sec the old pool of 10 exhausted — session reads stalled

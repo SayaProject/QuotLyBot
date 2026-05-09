@@ -3,6 +3,7 @@ require('dotenv').config({ path: './.env' })
 const fs = require('fs')
 const { Telegraf } = require('telegraf')
 const { createRedisClient } = require('./utils/redis')
+const { getMaxWorkers, getWorkerConcurrentLimit, getWorkerHandlerTimeout, getWorkerIndex } = require('./utils/worker-config')
 const { db } = require('./database')
 const { stats } = require('./middlewares')
 
@@ -28,8 +29,9 @@ const errorWithTimestamp = (message, ...args) => {
 
 class TelegramProcessor {
   constructor () {
+    this.maxWorkers = getMaxWorkers()
     this.bot = new Telegraf(process.env.BOT_TOKEN, {
-      handlerTimeout: 30000
+      handlerTimeout: getWorkerHandlerTimeout()
     })
 
     // Main Redis connection for queue and stats
@@ -47,10 +49,10 @@ class TelegramProcessor {
     this.isProcessing = false
     this.processedCount = 0
     this.errorCount = 0
-    this.concurrentLimit = 50 // Process up to 50 updates concurrently per worker
+    this.concurrentLimit = getWorkerConcurrentLimit() // Process updates concurrently per worker
     this.activePromises = new Set() // Track active processing promises
     this.workerId = process.env.WORKER_INDEX || process.env.pm_id || process.pid
-    this.workerIndex = process.env.WORKER_INDEX !== undefined ? parseInt(process.env.WORKER_INDEX) : (this.workerId % 3)
+    this.workerIndex = getWorkerIndex(process.env.WORKER_INDEX, this.workerId, this.maxWorkers)
     this.queueName = `telegram:updates:worker:${this.workerIndex}`
     this.pendingTDLibRequests = new Map() // Track pending TDLib requests
 

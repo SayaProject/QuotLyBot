@@ -13,10 +13,10 @@ RUN apt-get update && apt-get install -y \
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 # Copy source
 COPY . .
 
-# Default command (overridden in docker-compose)
-CMD ["node", "updates-collector.js"]
+# Default command for Railway and other single-container hosts.
+CMD ["npm", "start"]

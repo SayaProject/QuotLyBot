@@ -1,8 +1,5 @@
 const Telegram = require('telegraf/telegram')
 const fs = require('fs')
-const {
-  OpenAI
-} = require('openai')
 const slug = require('limax')
 const EmojiDbLib = require('emoji-db')
 
@@ -13,17 +10,9 @@ const emojiArray = Object.values(emojiDb.dbData).filter(data => {
 
 const telegram = new Telegram(process.env.BOT_TOKEN)
 
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENAI_API_KEY,
-  defaultHeaders: {
-    "HTTP-Referer": "https://quotlybot.t.me/",
-    "X-Title": "Quotly Bot",
-  }
-})
-
 const { sendGramadsAd } = require('../helpers/gramads')
 const deepLink = require('../helpers/deep-link')
+const { getOpenRouterClient } = require('../utils/openrouter-client')
 const denormalizeQuote = require('../utils/denormalize-quote')
 const buildQuoteReplyMarkup = require('../utils/build-quote-reply-markup')
 const persistQuoteArtifacts = require('../utils/persist-quote-artifacts')
@@ -1006,6 +995,14 @@ ${JSON.stringify(messageForAIContext)}
 
 
       messageForAI.push(userMessage)
+    }
+
+    const openai = getOpenRouterClient()
+    if (!openai) {
+      return ctx.replyWithHTML('AI quote mode is disabled because OPENAI_API_KEY is not configured.', {
+        reply_to_message_id: ctx.message.message_id,
+        allow_sending_without_reply: true
+      })
     }
 
     const completion = await openai.chat.completions.create({

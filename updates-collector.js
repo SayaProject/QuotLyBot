@@ -2,6 +2,7 @@ require('dotenv').config({ path: './.env' })
 
 const { Telegraf } = require('telegraf')
 const { createRedisClient } = require('./utils/redis')
+const { getMaxWorkers, getQueueIndexForChatId } = require('./utils/worker-config')
 const StickerStatsPublisher = require('./services/sticker-stats-publisher')
 
 const logWithTimestamp = (message) => {
@@ -14,6 +15,7 @@ const errorWithTimestamp = (message, ...args) => {
 
 class TelegramCollector {
   constructor() {
+    this.maxWorkers = getMaxWorkers()
     this.bot = new Telegraf(process.env.BOT_TOKEN, {
       handlerTimeout: 1000 // Fast timeout for collector
     })
@@ -59,7 +61,7 @@ class TelegramCollector {
 
         // Get chat ID for consistent worker assignment
         const chatId = this.getChatId(update)
-        const workerIndex = Math.abs(chatId) % 3 // 3 workers from docker-compose
+        const workerIndex = getQueueIndexForChatId(chatId, this.maxWorkers)
         const queueName = `telegram:updates:worker:${workerIndex}`
 
         // Push to specific worker queue
@@ -163,7 +165,7 @@ class TelegramCollector {
       await this.redis.connect()
 
       // Clear worker queues and reset stats
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < this.maxWorkers; i++) {
         await this.redis.del(`telegram:updates:worker:${i}`)
       }
       await this.redis.set('telegram:collected_count', 0)
@@ -190,7 +192,7 @@ class TelegramCollector {
 
           // Get queue sizes for all workers
           const queueSizes = []
-          for (let i = 0; i < 3; i++) {
+          for (let i = 0; i < this.maxWorkers; i++) {
             const size = await this.redis.llen(`telegram:updates:worker:${i}`)
             queueSizes.push(size)
           }

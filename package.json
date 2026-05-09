@@ -4,9 +4,11 @@
   "description": "Telegram quote bot",
   "main": "updates-collector.js",
   "scripts": {
-    "test": "node --test 'utils/*.test.js'",
-    "start": "node updates-collector.js",
+    "test": "node --test utils/*.test.js",
+    "start": "node railway-start.js",
+    "start:collector": "node updates-collector.js",
     "start:worker": "node updates-worker.js",
+    "start:railway": "node railway-start.js",
     "pm2": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop ecosystem.config.js",
     "pm2:restart": "pm2 restart ecosystem.config.js",

@@ -1,13 +1,4 @@
-const { OpenAI } = require('openai')
-
-const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENAI_API_KEY,
-  defaultHeaders: {
-    'HTTP-Referer': 'https://quotlybot.t.me/',
-    'X-Title': 'Quotly Bot'
-  }
-})
+const { getOpenRouterClient } = require('../utils/openrouter-client')
 
 const hashCode = (s) => {
   const l = s.length
@@ -115,6 +106,11 @@ IMPORTANT RULES:
 
 Focus on accuracy and clean data extraction. Prioritize message content and user identification over metadata.
 `
+
+    const openai = getOpenRouterClient()
+    if (!openai) {
+      return ctx.replyWithHTML('Image-to-quote AI is disabled because OPENAI_API_KEY is not configured.')
+    }
 
     // Call OpenAI Vision API
     const completion = await openai.chat.completions.create({
