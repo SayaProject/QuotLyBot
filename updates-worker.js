@@ -28,6 +28,16 @@ const errorWithTimestamp = (message, ...args) => {
   console.error(`[${new Date().toISOString()}] [WORKER-${workerId}] ${message}`, ...args)
 }
 
+function formatDuration (milliseconds) {
+  const seconds = Math.max(0, Math.floor(milliseconds / 1000))
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+
+  if (hours > 0) return `${hours}h ${minutes % 60}m`
+  if (minutes > 0) return `${minutes}m ${seconds % 60}s`
+  return `${seconds}s`
+}
+
 class TelegramProcessor {
   constructor () {
     this.maxWorkers = getMaxWorkers()
@@ -50,6 +60,11 @@ class TelegramProcessor {
     this.isProcessing = false
     this.processedCount = 0
     this.errorCount = 0
+    this.lastProcessedCount = 0
+    this.lastErrorCount = 0
+    this.lastStatsAt = Date.now()
+    this.lastProcessedAt = null
+    this.startedAt = Date.now()
     this.concurrentLimit = getWorkerConcurrentLimit() // Process updates concurrently per worker
     this.activePromises = new Set() // Track active processing promises
     this.workerId = process.env.WORKER_INDEX || process.env.pm_id || process.pid
@@ -175,9 +190,14 @@ class TelegramProcessor {
       await this.bot.handleUpdate(update)
 
       this.processedCount++
+      this.lastProcessedAt = Date.now()
 
       // Update global processed counter
-      await this.redis.incr('telegram:processed_count')
+      await this.redis
+        .multi()
+        .incr('telegram:processed_count')
+        .set('telegram:last_processed_at', this.lastProcessedAt)
+        .exec()
 
       // Don't log each update - only batch stats
     } catch (error) {
@@ -254,12 +274,21 @@ class TelegramProcessor {
       // Worker stats every 10 seconds
       setInterval(async () => {
         try {
+          const now = Date.now()
           const queueSize = await this.redis.llen(this.queueName)
           const totalProcessed = await this.redis.get('telegram:processed_count') || 0
           const totalErrors = await this.redis.get('telegram:error_count') || 0
           const activeCount = this.activePromises.size
+          const secondsSinceLastStats = Math.max(1, Math.round((now - this.lastStatsAt) / 1000))
+          const processedDelta = Math.max(0, this.processedCount - this.lastProcessedCount)
+          const errorDelta = Math.max(0, this.errorCount - this.lastErrorCount)
+          const localRate = (processedDelta / secondsSinceLastStats).toFixed(2)
+          const lastProcessed = this.lastProcessedAt ? `${formatDuration(now - this.lastProcessedAt)} ago` : 'none yet'
 
-          logWithTimestamp(`⚡ [${this.workerIndex}] | Queue: ${queueSize} | Processed: ${totalProcessed} | Errors: ${totalErrors} | Active: ${activeCount}/${this.concurrentLimit}`)
+          logWithTimestamp(`Live: ${this.isProcessing ? 'active' : 'stopped'} [${this.workerIndex}] | Queue: ${queueSize} | Local: ${this.processedCount} (+${processedDelta}/${secondsSinceLastStats}s, ${localRate}/s) | Global: ${totalProcessed} | Errors: ${totalErrors} (+${errorDelta}) | Active jobs: ${activeCount}/${this.concurrentLimit} | Last job: ${lastProcessed} | Uptime: ${formatDuration(now - this.startedAt)}`)
+          this.lastProcessedCount = this.processedCount
+          this.lastErrorCount = this.errorCount
+          this.lastStatsAt = now
         } catch (error) {
           errorWithTimestamp('Stats error:', error.message)
         }

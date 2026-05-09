@@ -24,6 +24,16 @@ const errorWithTimestamp = (message, ...args) => {
   console.error(`[${new Date().toISOString()}] [COLLECTOR] ${message}`, ...args)
 }
 
+function formatDuration (milliseconds) {
+  const seconds = Math.max(0, Math.floor(milliseconds / 1000))
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+
+  if (hours > 0) return `${hours}h ${minutes % 60}m`
+  if (minutes > 0) return `${minutes}m ${seconds % 60}s`
+  return `${seconds}s`
+}
+
 class TelegramCollector {
   constructor() {
     this.maxWorkers = getMaxWorkers()
@@ -34,6 +44,9 @@ class TelegramCollector {
     this.lockRenewTimer = null
     this.pollingRetryTimer = null
     this.statsTimer = null
+    this.startedAt = Date.now()
+    this.lastCollectedCount = 0
+    this.lastStatsAt = Date.now()
     this.bot = new Telegraf(process.env.BOT_TOKEN, {
       handlerTimeout: 1000 // Fast timeout for collector
     })
@@ -174,11 +187,12 @@ class TelegramCollector {
     this.bot.use(async (ctx) => {
       try {
         const update = ctx.update
+        const collectedAt = Date.now()
 
         // Add timestamp and priority
         const enrichedUpdate = {
           ...update,
-          collected_at: Date.now(),
+          collected_at: collectedAt,
           priority: this.getUpdatePriority(update)
         }
 
@@ -187,11 +201,13 @@ class TelegramCollector {
         const workerIndex = getQueueIndexForChatId(chatId, this.maxWorkers)
         const queueName = `telegram:updates:worker:${workerIndex}`
 
-        // Push to specific worker queue
-        await this.redis.lpush(queueName, JSON.stringify(enrichedUpdate))
-
-        // Track globally in Redis
-        await this.redis.incr('telegram:collected_count')
+        // Push to specific worker queue and track live activity.
+        await this.redis
+          .multi()
+          .lpush(queueName, JSON.stringify(enrichedUpdate))
+          .incr('telegram:collected_count')
+          .set('telegram:last_collected_at', collectedAt)
+          .exec()
 
         // Don't log each update - only batch stats
 
@@ -320,6 +336,12 @@ class TelegramCollector {
       await this.redis.del(`telegram:updates:worker:${i}`)
     }
     await this.redis.set('telegram:collected_count', 0)
+    await this.redis.set('telegram:processed_count', 0)
+    await this.redis.set('telegram:error_count', 0)
+    await this.redis.del('telegram:last_collected_at')
+    await this.redis.del('telegram:last_processed_at')
+    this.lastCollectedCount = 0
+    this.lastStatsAt = Date.now()
   }
 
   async startActiveCollector () {
@@ -365,7 +387,15 @@ class TelegramCollector {
 
     this.statsTimer = setInterval(async () => {
       try {
-        const collected = await this.redis.get('telegram:collected_count') || 0
+        const now = Date.now()
+        const collected = Number(await this.redis.get('telegram:collected_count') || 0)
+        const processed = Number(await this.redis.get('telegram:processed_count') || 0)
+        const errors = Number(await this.redis.get('telegram:error_count') || 0)
+        const lastCollectedAt = Number(await this.redis.get('telegram:last_collected_at') || 0)
+        const secondsSinceLastStats = Math.max(1, Math.round((now - this.lastStatsAt) / 1000))
+        const collectedDelta = Math.max(0, collected - this.lastCollectedCount)
+        const collectedRate = (collectedDelta / secondsSinceLastStats).toFixed(2)
+        const lastUpdate = lastCollectedAt > 0 ? `${formatDuration(now - lastCollectedAt)} ago` : 'none yet'
 
         // Get queue sizes for all workers
         const queueSizes = []
@@ -375,7 +405,9 @@ class TelegramCollector {
         }
         const totalQueue = queueSizes.reduce((a, b) => a + b, 0)
 
-        logWithTimestamp(`Collected: ${collected} | Total Queue: ${totalQueue} | Workers: [${queueSizes.join(',')}]`)
+        logWithTimestamp(`Live: ${this.hasCollectorLock ? 'active' : 'standby'} | Collected: ${collected} (+${collectedDelta}/${secondsSinceLastStats}s, ${collectedRate}/s) | Processed: ${processed} | Errors: ${errors} | Queue: ${totalQueue} | Workers: [${queueSizes.join(',')}] | Last update: ${lastUpdate} | Uptime: ${formatDuration(now - this.startedAt)}`)
+        this.lastCollectedCount = collected
+        this.lastStatsAt = now
       } catch (error) {
         errorWithTimestamp('Stats error:', error.message)
       }
