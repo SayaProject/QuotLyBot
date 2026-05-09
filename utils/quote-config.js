@@ -39,7 +39,11 @@ function isStickerCleanupEnabled (input = {}) {
 
 function getStickerCleanupSetName (input, botUsername) {
   if (!botUsername || !isStickerCleanupEnabled(input)) return null
-  return `${input.globalStickerSet.name.trim()}${botUsername}`
+
+  const configuredName = input.globalStickerSet.name.trim()
+  return configuredName.endsWith(botUsername)
+    ? configuredName
+    : `${configuredName}${botUsername}`
 }
 
 module.exports = {

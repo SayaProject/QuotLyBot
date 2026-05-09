@@ -51,6 +51,18 @@ test('enables sticker cleanup only for an explicitly named and enabled pack', ()
   assert.equal(getStickerCleanupSetName(config, 'SexySayaBot'), 'created_by_SexySayaBot')
 })
 
+test('does not append bot username when the configured sticker pack already includes it', () => {
+  const config = normalizeQuoteConfig({
+    globalStickerSet: {
+      name: 'created_by_SexySayaBot',
+      cleanup_enabled: true,
+      save_sticker_count: 1
+    }
+  })
+
+  assert.equal(getStickerCleanupSetName(config, 'SexySayaBot'), 'created_by_SexySayaBot')
+})
+
 test('allows sticker cleanup to be disabled even when a pack is named', () => {
   const config = normalizeQuoteConfig({
     globalStickerSet: {
