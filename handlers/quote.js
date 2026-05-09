@@ -13,6 +13,7 @@ const telegram = new Telegram(process.env.BOT_TOKEN)
 const deepLink = require('../helpers/deep-link')
 const denormalizeQuote = require('../utils/denormalize-quote')
 const buildQuoteReplyMarkup = require('../utils/build-quote-reply-markup')
+const { buildDirectQuoteMessage, getDirectQuoteText } = require('../utils/quote-command')
 const persistQuoteArtifacts = require('../utils/persist-quote-artifacts')
 const persistUserSetting = require('../helpers/persist-user-setting')
 const { isStickerSetInvalidError } = require('../utils/telegram-errors')
@@ -366,6 +367,9 @@ async function handleQuote (ctx, next) {
   }
 
   const isCommand = ctx.message.text ? ctx.message.text.match(/\/q/) : false
+  const directQuoteText = isCommand && !ctx.message.reply_to_message
+    ? getDirectQuoteText(ctx.message.text)
+    : ''
 
   if (ctx.message && ctx.message.text && isCommand) {
     const args = ctx.message.text.split(' ')
@@ -387,6 +391,11 @@ async function handleQuote (ctx, next) {
     flag.color = args.find((arg) => (!Object.values(flag).find((f) => arg === f)))
 
     if (flag.scale) flag.scale = flag.scale.match(/s([+-]?(?:\d*\.)?\d+)/)[1]
+
+    if (directQuoteText) {
+      flag.count = false
+      flag.color = false
+    }
   }
 
   // Batch forwarded messages in DM: Telegram sends separate updates for each
@@ -450,7 +459,11 @@ async function handleQuote (ctx, next) {
 
   let messages = []
 
-  if (ctx.chat.type === 'private' && !ctx.message.reply_to_message) {
+  if (directQuoteText) {
+    firstMessage = buildDirectQuoteMessage(ctx, directQuoteText)
+    messageCount = 1
+    messages.push(firstMessage)
+  } else if (ctx.chat.type === 'private' && !ctx.message.reply_to_message) {
     firstMessage = JSON.parse(JSON.stringify(ctx.message)) // copy message
     messageCount = maxQuoteMessage
   } else {
@@ -495,29 +508,33 @@ async function handleQuote (ctx, next) {
     }))
   }
 
-  const tCollectStart = Date.now()
-  try {
-    const tdlibMessages = await ctx.tdlib.getMessages(ctx.message.chat.id, (() => {
-      const m = []
-      for (let i = 0; i < messageCount; i++) {
-        m.push(startMessage + i)
+  if (!directQuoteText) {
+    const tCollectStart = Date.now()
+    try {
+      const tdlibMessages = await ctx.tdlib.getMessages(ctx.message.chat.id, (() => {
+        const m = []
+        for (let i = 0; i < messageCount; i++) {
+          m.push(startMessage + i)
+        }
+        return m
+      })())
+      messages.push(...tdlibMessages)
+    } catch (error) {
+      console.error('TDLib getMessages failed:', error.message)
+      // Fallback: use only the replied message if available
+      if (firstMessage) {
+        messages.push(firstMessage)
+      } else {
+        return ctx.replyWithHTML(ctx.i18n.t('quote.errors.api_down'), {
+          reply_to_message_id: ctx.message.message_id,
+          allow_sending_without_reply: true
+        })
       }
-      return m
-    })())
-    messages.push(...tdlibMessages)
-  } catch (error) {
-    console.error('TDLib getMessages failed:', error.message)
-    // Fallback: use only the replied message if available
-    if (firstMessage) {
-      messages.push(firstMessage)
-    } else {
-      return ctx.replyWithHTML(ctx.i18n.t('quote.errors.api_down'), {
-        reply_to_message_id: ctx.message.message_id,
-        allow_sending_without_reply: true
-      })
     }
+    ctx.state.collectMs = Date.now() - tCollectStart
+  } else {
+    ctx.state.collectMs = 0
   }
-  ctx.state.collectMs = Date.now() - tCollectStart
 
   messages = messages.filter((message) => message && Object.keys(message).length !== 0)
 
