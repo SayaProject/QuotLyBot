@@ -51,11 +51,12 @@ function stopClearStickerPack () {
 }
 
 function shouldStartStickerCleanup () {
-  return !process.env.WORKER_INDEX || process.env.WORKER_INDEX === '0'
+  return process.env.ENABLE_STICKER_CLEANUP === 'true' && (!process.env.WORKER_INDEX || process.env.WORKER_INDEX === '0')
 }
 
 // Cleans old stickers from the sticker pack periodically
 async function startClearStickerPack(stickerConfig = null) {
+  if (process.env.ENABLE_STICKER_CLEANUP !== 'true') return
   if (!isStickerCleanupEnabled(stickerConfig || config)) return
   if (clearStickerPackTimer) return
 
