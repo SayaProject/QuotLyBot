@@ -3,7 +3,8 @@
   "globalStickerSet": {
     "ownerId": 5940554521,
     "name": "created_by_",
-    "save_sticker_count": 1
+    "save_sticker_count": 1,
+    "cleanup_enabled": false
   },
   "adv": {
     "moderationChat": -1003951821704

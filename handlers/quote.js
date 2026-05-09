@@ -50,6 +50,10 @@ function stopClearStickerPack () {
   clearStickerPackTimer = null
 }
 
+function shouldStartStickerCleanup () {
+  return !process.env.WORKER_INDEX || process.env.WORKER_INDEX === '0'
+}
+
 // Cleans old stickers from the sticker pack periodically
 async function startClearStickerPack(stickerConfig = null) {
   if (!isStickerCleanupEnabled(stickerConfig || config)) return
@@ -1332,6 +1336,7 @@ module.exports = handleQuote
 
 // Initialize sticker pack cleaning with delay to allow config loading
 configReady.then(() => {
+  if (!shouldStartStickerCleanup()) return
   startClearStickerPack(config)
 }).catch((error) => {
   console.error(`Error initializing sticker cleanup: ${error.message}`)

@@ -10,6 +10,7 @@ test('normalizes missing quote config with safe defaults', () => {
   const config = normalizeQuoteConfig()
 
   assert.equal(config.globalStickerSet.name, '')
+  assert.equal(config.globalStickerSet.cleanup_enabled, false)
   assert.equal(config.globalStickerSet.save_sticker_count, 10)
   assert.equal(isStickerCleanupEnabled(config), false)
 })
@@ -25,10 +26,23 @@ test('normalizes invalid save count back to the default', () => {
   assert.equal(config.globalStickerSet.save_sticker_count, 10)
 })
 
-test('enables sticker cleanup only for an explicitly named pack', () => {
+test('keeps sticker cleanup disabled unless explicitly enabled', () => {
   const config = normalizeQuoteConfig({
     globalStickerSet: {
       name: 'created_by_',
+      save_sticker_count: 1
+    }
+  })
+
+  assert.equal(isStickerCleanupEnabled(config), false)
+  assert.equal(getStickerCleanupSetName(config, 'SexySayaBot'), null)
+})
+
+test('enables sticker cleanup only for an explicitly named and enabled pack', () => {
+  const config = normalizeQuoteConfig({
+    globalStickerSet: {
+      name: 'created_by_',
+      cleanup_enabled: true,
       save_sticker_count: 1
     }
   })

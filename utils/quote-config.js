@@ -1,5 +1,6 @@
 const DEFAULT_QUOTE_CONFIG = {
   globalStickerSet: {
+    cleanup_enabled: false,
     name: '',
     save_sticker_count: 10
   }
@@ -33,7 +34,7 @@ function isStickerCleanupEnabled (input = {}) {
   const stickerSet = input?.globalStickerSet
   if (!stickerSet || typeof stickerSet.name !== 'string') return false
 
-  return stickerSet.name.trim().length > 0 && stickerSet.cleanup_enabled !== false
+  return stickerSet.name.trim().length > 0 && stickerSet.cleanup_enabled === true
 }
 
 function getStickerCleanupSetName (input, botUsername) {
